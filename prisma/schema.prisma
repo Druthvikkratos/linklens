@@ -12,3 +12,39 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  links     Link[]
+
+  @@map("users")
+}
+
+model Link {
+  id          String    @id @default(uuid())
+  shortCode   String    @unique @map("short_code")
+  originalUrl String    @map("original_url")
+  expiresAt   DateTime? @map("expires_at")
+  userId      String    @map("user_id")
+  user        User      @relation(fields: [userId], references: [id])
+  clicks      Click[]
+
+  @@map("links")
+}
+
+model Click {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  browser   String
+  os        String
+  device    String
+  referrer  String?
+  linkId    String   @map("link_id")
+  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([linkId, createdAt])
+  @@map("clicks")
+}
