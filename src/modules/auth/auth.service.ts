@@ -32,11 +32,11 @@ export class AuthService {
       where: { email },
     });
     if (!user) {
-      throw new UnauthorizedException('Invalid Creditials');
+      throw new UnauthorizedException('Invalid credentials');
     }
     const passwordMatches = await bcrypt.compare(password, user.password);
     if (!passwordMatches) {
-      throw new UnauthorizedException('Invalid Creditials');
+      throw new UnauthorizedException('Invalid credentials');
     }
     const payload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(payload);

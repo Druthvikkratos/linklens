@@ -11,7 +11,7 @@ import {
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/auth.dto';
 import express from 'express';
-import { JwtAuthGaurd } from './guards/jwt-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorators';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
@@ -55,8 +55,8 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGaurd)
-  async me(@CurrentUser() req) {
-    return await this.authService.getCurrentUser(req.userId);
+  @UseGuards(JwtAuthGuard)
+  async me(@CurrentUser() user) {
+    return await this.authService.getCurrentUser(user.userId);
   }
 }
