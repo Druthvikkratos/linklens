@@ -59,4 +59,11 @@ export class AuthController {
   async me(@CurrentUser() user) {
     return await this.authService.getCurrentUser(user.userId);
   }
+
+  @Post('logout')
+  @HttpCode(200)
+  logout(@Res({ passthrough: true }) res: express.Response) {
+    res.clearCookie('access_token');
+    return { message: 'Logged Out' };
+  }
 }
