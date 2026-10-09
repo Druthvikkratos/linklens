@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { User } from '@prisma/client';
-import bcrypt from 'node_modules/bcryptjs/umd/types';
+import bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -58,5 +58,17 @@ export class AuthService {
       expiresIn: (process.env.JWT_EXPIRY as any) || '10h',
     });
     return { token, user };
+  }
+
+  async getCurrentUser(userId: string) {
+    const user = this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+      },
+    });
+    if (!user) throw new UnauthorizedException();
+    return user;
   }
 }
