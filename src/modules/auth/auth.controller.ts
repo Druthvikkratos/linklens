@@ -13,6 +13,7 @@ import { LoginDto } from './dto/auth.dto';
 import express from 'express';
 import { JwtAuthGaurd } from './guards/jwt-auth.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorators';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -41,9 +42,14 @@ export class AuthController {
     };
   }
 
+  @Post('register')
+  async create(@Body() createUserDto: CreateUserDto) {
+    return this.authService.createUser(createUserDto);
+  }
+
   @Get('me')
   @UseGuards(JwtAuthGaurd)
   async me(@CurrentUser() req) {
-    return this.authService.getCurrentUser(req.userId);
+    return await this.authService.getCurrentUser(req.userId);
   }
 }

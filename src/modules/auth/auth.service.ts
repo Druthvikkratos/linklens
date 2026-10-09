@@ -16,28 +16,12 @@ export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
+    private userService: UsersService,
   ) {}
 
-  async createUser(payload: CreateUserDto): Promise<User> {
+  async createUser(payload: CreateUserDto): Promise<Partial<User>> {
     this.logger.log(`Creating user: ${payload.email}`);
-    const existing = await this.prismaService.user.findUnique({
-      where: { email: payload.email },
-    });
-    if (existing) {
-      this.logger.warn(
-        `User creation blocked — email already in use: ${payload.email}`,
-      );
-      throw new BadRequestException('Email already in use');
-    }
-    const passwordHash = await bcrypt.hash(payload.password, 10);
-    const { password, ...rest } = payload;
-    const user = await this.prismaService.user.create({
-      data: {
-        ...rest,
-        password: passwordHash,
-      },
-    });
-    this.logger.log(`User created: ${user.id} (${user.email})`);
+    const user = await this.userService.createUser(payload);
     return user;
   }
 

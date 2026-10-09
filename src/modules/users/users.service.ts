@@ -14,7 +14,7 @@ export class UsersService {
   private readonly logger = new Logger(UsersService.name);
   constructor(private prismaService: PrismaService) {}
 
-  async createUser(payload: CreateUserDto): Promise<User> {
+  async createUser(payload: CreateUserDto): Promise<Partial<User>> {
     this.logger.log(`Creating user: ${payload.email}`);
     const existing = await this.prismaService.user.findUnique({
       where: { email: payload.email },
@@ -31,6 +31,9 @@ export class UsersService {
       data: {
         ...rest,
         password: passwordHash,
+      },
+      omit: {
+        password: true,
       },
     });
     this.logger.log(`User created: ${user.id} (${user.email})`);
