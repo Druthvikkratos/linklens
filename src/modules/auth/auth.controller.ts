@@ -1,0 +1,32 @@
+import { Body, Controller, HttpCode, Post, Res } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { LoginDto } from './dto/auth.dto';
+import express from 'express';
+
+@Controller('auth')
+export class AuthController {
+  constructor(private authService: AuthService) {}
+
+  @Post('login')
+  @HttpCode(200)
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
+    const { token, user } = await this.authService.login(
+      dto.email,
+      dto.password,
+    );
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 10 * 60 * 60 * 1000,
+    });
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    };
+  }
+}
