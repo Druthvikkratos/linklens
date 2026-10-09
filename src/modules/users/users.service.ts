@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -23,7 +24,7 @@ export class UsersService {
       this.logger.warn(
         `User creation blocked — email already in use: ${payload.email}`,
       );
-      throw new BadRequestException('Email already in use');
+      throw new ConflictException('A user with this email already exists.');
     }
     const passwordHash = await bcrypt.hash(payload.password, 10);
     const { password, ...rest } = payload;

@@ -14,10 +14,14 @@ import express from 'express';
 import { JwtAuthGaurd } from './guards/jwt-auth.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorators';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private configService: ConfigService,
+  ) {}
 
   @Post('login')
   @HttpCode(200)
@@ -29,11 +33,14 @@ export class AuthController {
       dto.email,
       dto.password,
     );
+    const expiresInSeconds = Number(
+      this.configService.getOrThrow<string>('JWT_EXPIRES_IN_SECONDS'),
+    );
     res.cookie('access_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 10 * 60 * 60 * 1000,
+      maxAge: expiresInSeconds * 1000,
     });
     return {
       id: user.id,

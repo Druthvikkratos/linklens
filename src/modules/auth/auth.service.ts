@@ -10,6 +10,7 @@ import bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(UsersService.name);
@@ -38,9 +39,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid Creditials');
     }
     const payload = { sub: user.id, email: user.email };
-    const token = this.jwtService.sign(payload, {
-      expiresIn: (process.env.JWT_EXPIRY as any) || '10h',
-    });
+    const token = this.jwtService.sign(payload);
     return { token, user };
   }
 
