@@ -12,6 +12,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/auth.dto';
 import express from 'express';
 import { JwtAuthGaurd } from './guards/jwt-auth.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorators';
 
 @Controller('auth')
 export class AuthController {
@@ -42,7 +43,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGaurd)
-  async me(@Request() req) {
-    return this.authService.getCurrentUser(req.user.userId);
+  async me(@CurrentUser() req) {
+    return this.authService.getCurrentUser(req.userId);
   }
 }
