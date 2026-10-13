@@ -41,4 +41,31 @@ export class LinkService {
       throw error;
     }
   }
+
+  async findAllLinks(page: number = 1) {
+    try {
+      const limit = 50;
+      const skip = (page - 1) * limit;
+      const [totalCount, data] = await this.prismaService.$transaction([
+        this.prismaService.link.count(),
+        this.prismaService.link.findMany({
+          take: limit,
+          skip: skip,
+          orderBy: {
+            createdAt: 'desc',
+          },
+        }),
+      ]);
+      return {
+        data,
+        meta: {
+          totalCount,
+          currentPage: page,
+          totalPages: Math.ceil(totalCount / limit),
+          hasNextPage: skip + data.length < totalCount,
+          hasPreviousPage: page > 1,
+        },
+      };
+    } catch (error) {}
+  }
 }
