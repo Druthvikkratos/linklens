@@ -22,10 +22,6 @@ export class CreateLinkDto {
   )
   originalUrl!: string;
 
-  @IsString()
-  @IsUrl({}, { message: 'The link must be a valid URL.' })
-  javascript!: string;
-
   @IsOptional()
   @IsDate()
   @Type(() => Date)
