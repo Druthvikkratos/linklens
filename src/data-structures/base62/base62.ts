@@ -2,7 +2,7 @@ export const ALPHABET =
   '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 export function encode(number: number) {
-  let safeInteger = Number.isSafeInteger(number);
+  const safeInteger = Number.isSafeInteger(number);
   if (!safeInteger || number < 0) {
     throw new Error('Number should be a non-negative safe integer');
   }
@@ -19,6 +19,9 @@ export function encode(number: number) {
 }
 
 export function decode(string: string): number {
+  if(string === ''){
+    throw new Error('Invalid character cannot be decoded');
+  }
   let result = 0;
   for (let i = 0; i < string.length; i++) {
     if (!ALPHABET.includes(string[i])) {

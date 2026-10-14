@@ -1,33 +1,41 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLinkDto } from './dto/create-link-dto';
-import { CurrentUser } from 'src/common/decorators/current-user.decorators';
 import { encode } from 'src/data-structures/base62/base62';
 import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'crypto';
+import { LinkQueryDto } from './dto/link-query-dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class LinkService {
+  private readonly logger = new Logger(LinkService.name);
   constructor(
     private prismaService: PrismaService,
     private configService: ConfigService,
   ) {}
 
-  async createLink(payload: CreateLinkDto, @CurrentUser() user) {
+  async createLink(payload: CreateLinkDto, userId: string) {
+    this.logger.log(`Creating a new short link for user: ${userId}`);
     try {
       return await this.prismaService.$transaction(async (tx) => {
         const newUrl = await tx.link.create({
           data: {
-            shortCode: 'Temp-Code',
+            shortCode: crypto.randomUUID(),
             originalUrl: payload.originalUrl,
-            userId: user.userId,
+            userId: userId,
+            expiresAt: payload.expiresAt,
           },
         });
+        this.logger.debug(`Link record created with ID: ${newUrl.id}`);
         const generatedShortCode = encode(newUrl.id);
         const updateUrl = await tx.link.update({
           where: { id: newUrl.id },
           data: { shortCode: generatedShortCode },
         });
-
+        this.logger.log(
+          `Short link created successfully. Link ID: ${updateUrl.id}`,
+        );
         return {
           ...updateUrl,
           shortUrl:
@@ -37,35 +45,54 @@ export class LinkService {
         };
       });
     } catch (error) {
-      console.error('Failed to create link:', error);
+      this.logger.error(
+        `Failed to create short link for user: ${userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+
       throw error;
     }
   }
 
-  async findAllLinks(page: number = 1) {
+  async findAllLinks(query: LinkQueryDto, userId: string) {
+    const {
+      page = 1,
+      limit = 50,
+      sortField = 'createdAt',
+      sortDir = 'desc',
+    } = query;
+
+    this.logger.log(
+      `Fetching links for user: ${userId}, page: ${page}, limit: ${limit}`,
+    );
     try {
-      const limit = 50;
-      const skip = (page - 1) * limit;
-      const [totalCount, data] = await this.prismaService.$transaction([
-        this.prismaService.link.count(),
+      const where: Prisma.LinkWhereInput = { userId };
+      const [data, total] = await this.prismaService.$transaction([
         this.prismaService.link.findMany({
+          where,
           take: limit,
-          skip: skip,
-          orderBy: {
-            createdAt: 'desc',
-          },
+          skip: (page - 1) * limit,
+          orderBy: { [sortField]: sortDir },
         }),
+        this.prismaService.link.count({ where }),
       ]);
+      this.logger.log(
+        `Fetched ${data.length} links for user: ${userId}. Total: ${total}`,
+      );
       return {
         data,
-        meta: {
-          totalCount,
-          currentPage: page,
-          totalPages: Math.ceil(totalCount / limit),
-          hasNextPage: skip + data.length < totalCount,
-          hasPreviousPage: page > 1,
-        },
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       };
-    } catch (error) {}
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch links for user: ${userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+
+      throw error;
+    }
   }
 }
