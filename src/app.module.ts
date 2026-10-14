@@ -7,6 +7,7 @@ import { HealthModule } from './modules/health/health.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { LinkModule } from './modules/link/link.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { JwtModule } from '@nestjs/jwt';
     HealthModule,
     UsersModule,
     AuthModule,
+    LinkModule
   ],
   controllers: [AppController],
   providers: [AppService],
