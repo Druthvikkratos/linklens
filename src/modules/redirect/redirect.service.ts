@@ -1,11 +1,22 @@
-import { GoneException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  GoneException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ClicksService } from '../clicks/clicks.service';
 
 @Injectable()
 export class RedirectService {
-  constructor(private prismaService: PrismaService) {}
+  private readonly logger = new Logger(RedirectService.name);
+  constructor(
+    private prismaService: PrismaService,
+    private clickService: ClicksService,
+  ) {}
 
-  async findLinkByShortCode(shortCode: string) {
+  async findLinkByShortCode(shortCode: string, request: Request) {
+    this.logger.log(`Finding a new link using short code: ${shortCode}`);
     const link = await this.prismaService.link.findUnique({
       where: { shortCode: shortCode },
     });
@@ -17,9 +28,16 @@ export class RedirectService {
         `Link with ID ${link.id} existed, but it has expired.`,
       );
     }
+    this.clickService.record(
+      link.id,
+      request.headers['user-agent'] ?? '',
+      request.headers['referer'] ?? null,
+    ).catch((error: any) => {
+      this.logger.error('Failed to record click', error.stack);
+    })
     return {
       url: link.originalUrl,
-      statusCode: 302
-    }
+      statusCode: 302,
+    };
   }
 }
