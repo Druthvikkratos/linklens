@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Redirect } from '@nestjs/common';
+import { Controller, Get, Param, Redirect, Req } from '@nestjs/common';
 import { RedirectService } from './redirect.service';
 
 @Controller('redirect')
@@ -7,7 +7,7 @@ export class RedirectController {
 
   @Get(':code')
   @Redirect('https://docs.nestjs.com', 302)
-  async findAll(@Param('code') shortCode: string) {
-    return this.redirectService.findLinkByShortCode(shortCode);
+  async findAll(@Param('code') shortCode: string, @Req() request: Request) {
+    return this.redirectService.findLinkByShortCode(shortCode, request  );
   }
 }

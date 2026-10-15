@@ -1,11 +1,15 @@
 import { GoneException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ClicksService } from '../clicks/clicks.service';
 
 @Injectable()
 export class RedirectService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private clickService: ClicksService,
+  ) {}
 
-  async findLinkByShortCode(shortCode: string) {
+  async findLinkByShortCode(shortCode: string, request: Request) {
     const link = await this.prismaService.link.findUnique({
       where: { shortCode: shortCode },
     });
@@ -17,9 +21,14 @@ export class RedirectService {
         `Link with ID ${link.id} existed, but it has expired.`,
       );
     }
+    await this.clickService.record({
+      linkId: link.id,
+      userAgent: request.headers['user-agent'] ?? '',
+      referrer: request.headers['referer'] ?? null,
+    });
     return {
       url: link.originalUrl,
-      statusCode: 302
-    }
+      statusCode: 302,
+    };
   }
 }
