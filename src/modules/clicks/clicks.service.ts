@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateClickDto } from './dto/click-create.dto';
 import { UAParser } from 'ua-parser-js';
 
 @Injectable()
 export class ClicksService {
   constructor(private prismaService: PrismaService) {}
 
-  async record(payload: CreateClickDto) {
-    const userAgent = payload.userAgent || '';
-    const parser = new UAParser(userAgent);
+  async record(linkId: number, userAgent: string, referrer?: string, ) {
+    const getUserAgent = userAgent || '';
+    const parser = new UAParser(getUserAgent);
 
     const browserName: string | undefined = parser.getBrowser().name;
     const osName: string | undefined = parser.getOS().name;
@@ -22,18 +21,18 @@ export class ClicksService {
       finalDevice = deviceType;
     } else if (browserName || osName) {
       finalDevice = 'Desktop';
-    } else if (!deviceType && !browserName && !osName) {
+    } else {
       finalDevice = 'Unknown';
     }
-    const link = await this.prismaService.click.create({
+    const click = await this.prismaService.click.create({
       data: {
-        linkId: payload.linkId,
+        linkId: linkId,
         browser: finalBrowser,
         os: finalOs,
         device: finalDevice,
-        referrer: payload.referrer ?? null,
+        referrer: referrer ?? null,
       },
     });
-    return link;
+    return click;
   }
 }
