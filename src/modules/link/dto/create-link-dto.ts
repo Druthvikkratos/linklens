@@ -1,12 +1,9 @@
 import { Type } from 'class-transformer';
 import {
   IsDate,
-  IsEmail,
   IsOptional,
-  IsString,
   IsUrl,
   MinDate,
-  MinLength,
 } from 'class-validator';
 
 export class CreateLinkDto {
