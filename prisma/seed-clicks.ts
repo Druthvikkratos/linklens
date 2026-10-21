@@ -5,7 +5,7 @@ const count = Number(process.argv[3]);
 
 const MAX_COUNT = 5_000_000;
 const THIRTY_DAYS_MS = 30 * (24 * 60 * 60 * 1000);
-const BATCH_SIZE = 5000
+const BATCH_SIZE = 5000;
 
 const prisma = new PrismaClient();
 
@@ -83,22 +83,26 @@ async function main() {
       process.exitCode = 1;
       return;
     }
-    const profile = randomItem(profiles);
-    const referrer = randomItem(referrers);
-    const click = await prisma.click.create({
-      data: {
-        linkId: link.id,
-        browser: profile.browser,
-        os: profile.os,
-        device: profile.device,
-        referrer: referrer,
-        createdAt: randomDate(),
-      },
-    });
-    console.log(
-      `click id - ${click.id} click creation date - ${click.createdAt}`,
-    );
-    return click;
+    let remaining = count;
+    let inserted = 0;
+    const startTime = performance.now();
+    while (remaining > 0) {
+      const batchSize = Math.min(BATCH_SIZE, remaining);
+      const batch = Array.from({ length: batchSize }, (_, i) =>
+        makeClick(linkId),
+      );
+      await prisma.click.createMany({
+        data: batch,
+      });
+      inserted = inserted + batchSize;
+      console.log(`Inserted ${inserted} / ${count}`);
+      remaining = remaining - batchSize;
+    }
+    const endTime = performance.now();
+    const elapsedSeconds = (endTime - startTime) / 1000;
+    const rowsPerSecond = inserted / elapsedSeconds;
+    console.log(`Total time: ${elapsedSeconds.toFixed(2)} seconds`);
+    console.log(`Rows per second: ${Math.round(rowsPerSecond)}`);
   } finally {
     await prisma.$disconnect();
   }
