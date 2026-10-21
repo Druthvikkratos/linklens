@@ -5,6 +5,7 @@ const count = Number(process.argv[3]);
 
 const MAX_COUNT = 5_000_000;
 const THIRTY_DAYS_MS = 30 * (24 * 60 * 60 * 1000);
+const BATCH_SIZE = 5000
 
 const prisma = new PrismaClient();
 
@@ -56,6 +57,20 @@ function randomDate() {
   return new Date(randomTimestamp);
 }
 
+function makeClick(linkId: number) {
+  const profile = randomItem(profiles);
+  const referrer = randomItem(referrers);
+  const date = randomDate();
+  return {
+    linkId: linkId,
+    browser: profile.browser,
+    os: profile.os,
+    device: profile.device,
+    referrer: referrer,
+    createdAt: date,
+  };
+}
+
 async function main() {
   try {
     const link = await prisma.link.findUnique({
@@ -65,8 +80,8 @@ async function main() {
     });
     if (!link) {
       console.error(`link ${linkId} not found`);
-      process.exitCode = 1
-      return
+      process.exitCode = 1;
+      return;
     }
     const profile = randomItem(profiles);
     const referrer = randomItem(referrers);
