@@ -83,20 +83,16 @@ async function main() {
       process.exitCode = 1;
       return;
     }
-    let remaining = count;
     let inserted = 0;
     const startTime = performance.now();
-    while (remaining > 0) {
-      const batchSize = Math.min(BATCH_SIZE, remaining);
-      const batch = Array.from({ length: batchSize }, (_, i) =>
-        makeClick(linkId),
-      );
-      await prisma.click.createMany({
+    while (inserted < count) {
+      const batchSize = Math.min(BATCH_SIZE, count - inserted);
+      const batch = Array.from({ length: batchSize }, () => makeClick(linkId));
+      const result = await prisma.click.createMany({
         data: batch,
       });
-      inserted = inserted + batchSize;
+      inserted = inserted + result.count;
       console.log(`Inserted ${inserted} / ${count}`);
-      remaining = remaining - batchSize;
     }
     const endTime = performance.now();
     const elapsedSeconds = (endTime - startTime) / 1000;
