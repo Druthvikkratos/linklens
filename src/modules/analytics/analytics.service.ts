@@ -8,7 +8,19 @@ export class AnalyticsService {
   constructor(private prismaService: PrismaService) {}
 
   async getStats(userId: string, linkId: number, query: StatsQueryDto) {
-    const link = await this.getLinkByUserId(userId, linkId);
+    const link = await this.findOwnedLink(userId, linkId);
+    const now = new Date();
+    const milliseconds: number = query.days * 24 * 60 * 60 * 1000;
+    const previousTimestamp = now.getTime() - milliseconds;
+    const fromDate = new Date(previousTimestamp);
+    const clicksInPeriod = await this.prismaService.click.count({
+      where: {
+        linkId: link.id,
+        createdAt: {
+          gte: fromDate,
+        },
+      },
+    });
     const count = await this.prismaService.click.count({
       where: {
         linkId: link.id,
@@ -21,16 +33,16 @@ export class AnalyticsService {
     };
   }
 
-  private async getLinkByUserId(userId: string, linkId: number) {
-    const findTheStats = await this.prismaService.link.findFirst({
+  private async findOwnedLink(userId: string, linkId: number) {
+    const link = await this.prismaService.link.findFirst({
       where: {
         userId: userId,
         id: linkId,
       },
     });
-    if (!findTheStats) {
+    if (!link) {
       throw new NotFoundException('Link not found for the user');
     }
-    return findTheStats;
+    return link;
   }
 }
