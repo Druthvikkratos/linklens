@@ -1,4 +1,4 @@
-import { DailyCountRecord } from '../analytics.service';
+import { DailyCountRecord } from '../analytics.types';
 
 export function fillMissingDays(
   array: DailyCountRecord[],

@@ -1,4 +1,4 @@
-import { DailyCountRecord } from '../analytics.service';
+import type { DailyCountRecord } from '../analytics.types';
 import { fillMissingDays } from './fill-missing-days';
 
 describe('fill-missing-days', () => {

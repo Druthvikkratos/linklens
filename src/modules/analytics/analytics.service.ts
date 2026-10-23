@@ -2,11 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StatsQueryDto } from './dto/statsquery.dto';
 import { fillMissingDays } from './utils/fill-missing-days';
-
-export interface DailyCountRecord {
-  date: string;
-  count: number;
-}
+import { DailyCountRecord } from './analytics.types';
 
 @Injectable()
 export class AnalyticsService {
