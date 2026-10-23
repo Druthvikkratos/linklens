@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StatsQueryDto } from './dto/statsquery.dto';
+import { fillMissingDays } from './utils/fill-missing-days';
 
 export interface DailyCountRecord {
   date: string;
@@ -90,6 +91,7 @@ export class AnalyticsService {
       }),
       this.getClicksPerDay(link.id, fromDate),
     ]);
+    const dailyClicks = fillMissingDays(clicksPerDay, fromDate, now);
     const browsers = groupByBrowserResult.map((item) => ({
       name: item.browser,
       count: item._count._all,
@@ -120,7 +122,7 @@ export class AnalyticsService {
         from: fromDate,
         to: now,
       },
-      clicksPerDay,
+      clicksPerDay: dailyClicks,
     };
   }
 

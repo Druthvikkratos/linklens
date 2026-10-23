@@ -17,7 +17,7 @@ export function fillMissingDays(
   const currentDate: Date = new Date(from);
 
   while (currentDate.getTime() <= to.getTime()) {
-    const curr = new Date(currentDate).toISOString().slice(0, 10)
+    const curr = new Date(currentDate).toISOString().slice(0, 10);
     const count = clicksByDate.get(curr) ?? 0;
     results.push({
       date: curr,
@@ -25,5 +25,5 @@ export function fillMissingDays(
     });
     currentDate.setUTCDate(currentDate.getUTCDate() + 1);
   }
-  return results
+  return results;
 }
