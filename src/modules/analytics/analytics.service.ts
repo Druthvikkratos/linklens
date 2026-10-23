@@ -87,7 +87,7 @@ export class AnalyticsService {
       }),
       this.getClicksPerDay(link.id, fromDate),
     ]);
-    const dailyClicks = fillMissingDays(clicksPerDay, fromDate, now);
+    const completeClicksPerDay = fillMissingDays(clicksPerDay, fromDate, now);
     const browsers = groupByBrowserResult.map((item) => ({
       name: item.browser,
       count: item._count.id,
@@ -118,7 +118,7 @@ export class AnalyticsService {
         from: fromDate,
         to: now,
       },
-      clicksPerDay: dailyClicks,
+      clicksPerDay: completeClicksPerDay,
     };
   }
 
