@@ -36,11 +36,11 @@ export class AnalyticsService {
         by: ['browser'],
         where,
         _count: {
-          _all: true,
+          id: true,
         },
         orderBy: {
           _count: {
-            browser: 'desc',
+            id: 'desc',
           },
         },
         take: 5,
@@ -49,11 +49,11 @@ export class AnalyticsService {
         by: ['device'],
         where,
         _count: {
-          _all: true,
+          id: true,
         },
         orderBy: {
           _count: {
-            device: 'desc',
+            id: 'desc',
           },
         },
         take: 5,
@@ -62,11 +62,11 @@ export class AnalyticsService {
         by: ['os'],
         where,
         _count: {
-          _all: true,
+          id: true,
         },
         orderBy: {
           _count: {
-            os: 'desc',
+            id: 'desc',
           },
         },
         take: 5,
@@ -75,11 +75,11 @@ export class AnalyticsService {
         by: ['referrer'],
         where,
         _count: {
-          _all: true,
+          id: true,
         },
         orderBy: {
           _count: {
-            referrer: 'desc',
+            id: 'desc',
           },
         },
         take: 5,
@@ -94,19 +94,19 @@ export class AnalyticsService {
     const dailyClicks = fillMissingDays(clicksPerDay, fromDate, now);
     const browsers = groupByBrowserResult.map((item) => ({
       name: item.browser,
-      count: item._count._all,
+      count: item._count.id,
     }));
     const devices = groupByDeviceResult.map((item) => ({
       name: item.device,
-      count: item._count._all,
+      count: item._count.id,
     }));
     const operatingSystems = groupByOsResult.map((item) => ({
       name: item.os,
-      count: item._count._all,
+      count: item._count.id,
     }));
     const referrers = groupByReferrerResult.map((item) => ({
       name: item.referrer ?? 'direct',
-      count: item._count._all,
+      count: item._count.id,
     }));
     return {
       linkId: link.id,
