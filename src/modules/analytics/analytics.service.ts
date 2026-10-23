@@ -140,7 +140,7 @@ export class AnalyticsService {
   private async getClicksPerDay(linkId: number, fromDate: Date) {
     const clicks = await this.prismaService.$queryRaw<
       DailyCountRecord[]
-    >`SELECT DATE_TRUNC('day', created_at) AS date,COUNT(*)::int FROM clicks WHERE link_id = ${linkId} AND created_at >= ${fromDate} GROUP BY date ORDER BY
+    >`SELECT DATE_TRUNC('day', created_at) AS date,COUNT(*)::int AS count FROM clicks WHERE link_id = ${linkId} AND created_at >= (${fromDate}::timestamptz AT TIME ZONE 'UTC') GROUP BY date ORDER BY
      date ASC;`;
     const clicksByGroup = clicks.map((item) => ({
       date: new Date(item.date).toISOString().slice(0, 10),

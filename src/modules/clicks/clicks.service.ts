@@ -20,7 +20,7 @@ export class ClicksService {
     if (deviceType) {
       finalDevice = deviceType;
     } else if (browserName || osName) {
-      finalDevice = 'Desktop';
+      finalDevice = 'desktop';
     } else {
       finalDevice = 'Unknown';
     }

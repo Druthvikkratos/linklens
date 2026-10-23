@@ -30,7 +30,7 @@ describe('ClicksService', () => {
       linkId: 1,
       browser: 'Chrome',
       os: 'Windows',
-      device: 'Desktop',
+      device: 'desktop',
       referrer: null,
     };
     mockPrismaService.click.create.mockResolvedValue(sampleClick);
@@ -48,7 +48,7 @@ describe('ClicksService', () => {
         linkId: 1,
         browser: 'Chrome',
         os: 'Windows',
-        device: 'Desktop',
+        device: 'desktop',
         referrer: null,
       },
     });
@@ -178,7 +178,7 @@ describe('ClicksService', () => {
       linkId: 1,
       browser: 'Chrome',
       os: 'Windows',
-      device: 'Desktop',
+      device: 'desktop',
       referrer: null,
     };
     mockPrismaService.click.create.mockResolvedValue(sampleClick);
