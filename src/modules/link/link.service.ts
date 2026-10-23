@@ -3,7 +3,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateLinkDto } from './dto/create-link-dto';
 import { encode } from 'src/data-structures/base62/base62';
 import { ConfigService } from '@nestjs/config';
-import { randomUUID } from 'crypto';
 import { LinkQueryDto } from './dto/link-query-dto';
 import { Prisma } from '@prisma/client';
 
