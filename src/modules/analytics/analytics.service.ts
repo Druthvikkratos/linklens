@@ -2,6 +2,11 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StatsQueryDto } from './dto/statsquery.dto';
 
+export interface DailyCountRecord {
+  date: string;
+  count: number;
+}
+
 @Injectable()
 export class AnalyticsService {
   private readonly logger = new Logger(AnalyticsService.name);
@@ -21,6 +26,7 @@ export class AnalyticsService {
       groupByOsResult,
       groupByReferrerResult,
       totalCount,
+      clicksPerDay,
     ] = await Promise.all([
       this.prismaService.click.count({
         where,
@@ -77,11 +83,12 @@ export class AnalyticsService {
         },
         take: 5,
       }),
-      await this.prismaService.click.count({
+      this.prismaService.click.count({
         where: {
           linkId: link.id,
         },
       }),
+      this.getClicksPerDay(link.id, fromDate),
     ]);
     const browsers = groupByBrowserResult.map((item) => ({
       name: item.browser,
@@ -113,6 +120,7 @@ export class AnalyticsService {
         from: fromDate,
         to: now,
       },
+      clicksPerDay,
     };
   }
 
@@ -127,5 +135,17 @@ export class AnalyticsService {
       throw new NotFoundException('Link not found for the user');
     }
     return link;
+  }
+
+  private async getClicksPerDay(linkId: number, fromDate: Date) {
+    const clicks = await this.prismaService.$queryRaw<
+      DailyCountRecord[]
+    >`SELECT DATE_TRUNC('day', created_at) AS date,COUNT(*)::int FROM clicks WHERE link_id = ${linkId} AND created_at >= ${fromDate} GROUP BY date ORDER BY
+     date ASC;`;
+    const clicksByGroup = clicks.map((item) => ({
+      date: new Date(item.date).toISOString().slice(0, 10),
+      count: item.count,
+    }));
+    return clicksByGroup;
   }
 }
