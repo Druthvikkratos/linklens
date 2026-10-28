@@ -1,36 +1,39 @@
-import { error } from 'console';
-
 export class DoublyLinkedListNode<K, V> {
-  public key: K | undefined;
-  public value: V | undefined;
+  public key: K;
+  public value: V;
   public next!: DoublyLinkedListNode<K, V>;
   public prev!: DoublyLinkedListNode<K, V>;
 
-  constructor(key: K | undefined, value: V | undefined) {
+  constructor(key: K, value: V) {
     this.key = key;
     this.value = value;
   }
 }
 
 export class DoublyLinkedList<K, V> {
-  private head!: DoublyLinkedListNode<K, V>;
-  private tail!: DoublyLinkedListNode<K, V>;
+  private head: DoublyLinkedListNode<K, V>;
+  private tail: DoublyLinkedListNode<K, V>;
   private _size: number = 0;
 
   constructor() {
-    this.head = new DoublyLinkedListNode<K, V>(undefined, undefined);
-    this.tail = new DoublyLinkedListNode<K, V>(undefined, undefined);
+    // Sentinel nodes use placeholder key/value; these values are never read
+    this.head = new DoublyLinkedListNode<K, V>(
+      undefined as unknown as K,
+      undefined as unknown as V,
+    );
+    this.tail = new DoublyLinkedListNode<K, V>(
+      undefined as unknown as K,
+      undefined as unknown as V,
+    );
     this.head.next = this.tail;
     this.tail.prev = this.head;
-    this.head.prev = this.tail;
-    this.tail.next = this.head;
   }
 
   public get size(): number {
     return this._size;
   }
 
-  addFirst(node: DoublyLinkedListNode<K, V>) {
+  addFirst(node: DoublyLinkedListNode<K, V>): void {
     const oldFirst = this.head.next;
     node.next = oldFirst;
     node.prev = this.head;
@@ -39,19 +42,17 @@ export class DoublyLinkedList<K, V> {
     this._size += 1;
   }
 
-  toArray() {
-    let keys: K[] = [];
-    let firstNode = this.head.next;
-    while (firstNode != this.tail) {
-      if (firstNode.key != undefined) {
-        keys.push(firstNode.key);
-      }
-      firstNode = firstNode.next;
+  toArray(): K[] {
+    const keys: K[] = [];
+    let current = this.head.next;
+    while (current !== this.tail) {
+      keys.push(current.key);
+      current = current.next;
     }
     return keys;
   }
 
-  removeLast() {
+  removeLast(): DoublyLinkedListNode<K, V> | undefined {
     if (this.tail.prev === this.head) {
       return undefined;
     }
@@ -64,11 +65,14 @@ export class DoublyLinkedList<K, V> {
     return lastNode;
   }
 
-  remove(node: DoublyLinkedListNode<K, V>) {
+  remove(node: DoublyLinkedListNode<K, V>): void {
     const prevNode = node.prev; //A
     const nextNode = node.next; // C
     if (prevNode === undefined || nextNode === undefined) {
       throw Error('Node not found');
+    }
+    if (prevNode === node || nextNode === node) {
+      throw Error('Node is already removed');
     }
     prevNode.next = nextNode;
     nextNode.prev = prevNode;
@@ -77,7 +81,7 @@ export class DoublyLinkedList<K, V> {
     this._size -= 1;
   }
 
-  moveToFront(node: DoublyLinkedListNode<K, V>) {
+  moveToFront(node: DoublyLinkedListNode<K, V>): void {
     this.remove(node);
     this.addFirst(node);
   }

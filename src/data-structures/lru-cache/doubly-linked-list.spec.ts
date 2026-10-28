@@ -123,4 +123,36 @@ describe('Doubly-Linked', () => {
     expect(list.toArray()).toEqual(['A', 'B']);
     expect(list.size).toBe(2);
   });
+  it('should throw error if same node is removed twice', () => {
+    const nodea = new DoublyLinkedListNode<string, string>('A', 'Africa');
+    list.addFirst(nodea);
+    list.remove(nodea);
+    expect(list.size).toBe(0);
+    expect(() => list.remove(nodea)).toThrow('Node is already removed');
+  });
+  it('should add a new node if becomes empty', () => {
+    const nodea = new DoublyLinkedListNode<string, string>('A', 'Africa');
+    list.addFirst(nodea);
+    list.remove(nodea);
+    const nodeb = new DoublyLinkedListNode<string, string>('B', 'Ball');
+    list.addFirst(nodeb);
+    expect(list.toArray()).toEqual(['B']);
+    expect(list.size).toBe(1);
+  });
+  it('should remove last and add one node', () => {
+    const nodec = new DoublyLinkedListNode<string, string>('C', 'Car');
+    const nodeb = new DoublyLinkedListNode<string, string>('B', 'Ball');
+    const nodea = new DoublyLinkedListNode<string, string>('A', 'Africa');
+    list.addFirst(nodec);
+    list.addFirst(nodeb);
+    list.addFirst(nodea);
+    list.removeLast();
+    list.removeLast();
+    list.removeLast();
+    expect(list.size).toBe(0);
+    const nodeA = new DoublyLinkedListNode<string, string>('A', 'Africa');
+    list.addFirst(nodeA);
+    expect(list.toArray()).toEqual(['A']);
+    expect(list.size).toBe(1);
+  });
 });
